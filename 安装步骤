@@ -1,0 +1,63 @@
+http://lnmp.org/download.html 一键安装包下载路径
+0.检查一下yum配置什么的，看看yum是否可用(安装没有成功，原因就是因为yum的问题)
+1.检查是否安装gcc 检查命令gcc -v
+2.把压缩包(lnmp1.2-full.tar.gz)放到 /usr/src/下面(个人习惯也可以放到其他地方)
+3.解压缩 tar zxf lnmp1.2-full.tar.gz
+4.cd lnmp1.2-full && ./install.sh lnmp
+5.第一个提示的意思是：需要设置MySQL的root密码（不输入直接回车将会设置为root）如果输入有错误需要删除时，可以按住Ctrl再按Backspace键进行删除。输入后回车进入下一步
+6.第二个提示的意思是：这里需要确认是否启用MySQL InnoDB，如果不确定是否启用可以输入 y ，输入 y 表示启用，输入 n 表示不启用。默认为y 启用，输入后回车进入下一步，选择MySQL版本：
+7.第三个提示的意思是：输入MySQL或MariaDB版本的序号，回车进入下一步，选择PHP版本：
+8.第三个提示的意思是：输入PHP版本的序号，回车进入下一步，选择是否安装内存优化：(选择1不进行内存优化)
+9.如果是LNMPA或LAMP的话还需要设置管理员邮箱（如果选择lnmp就不会出现这个选项了）
+10.再选择Apache版本（如果选择lnmp就不会出现这个选项了）
+11.提示"Press any key to install...or Press Ctrl+c to cancel"后，按回车键确认开始安装。 
+LNMP脚本就会自动安装编译Nginx、MySQL、PHP、phpMyAdmin、Zend Optimizer这几个软件。
+12.安装目录在 /usr/local/
+13.安装完成后nginx的配置放问目录在 /home/wwwroot/default/
+14.修改nginx的配置文件(/usr/local/nginx/conf/nginx.conf),使其访问目录为 /www
+15.修改了配置文件后最好先检查一下修改过的配置文件是否正确，以免重启后Nginx出现错误影响服务器稳定运行。判断Nginx配置否正确命令如下：
+nginx -t -c /usr/local/nginx/conf/nginx.conf
+16. service nginx reload  重启Nginx
+service nginx start 启动
+service nginx stop 停止
+
+
+nginx错误日志的配置(一般改为debug类型)
+nginx的error_log类型如下（从左到右：debug最详细 crit最少）： 
+[ debug | info | notice | warn | error | crit ] 
+例如：error_log logs/nginx_error.log  crit;
+解释：日志文件存储在nginx安装目录下的 /home/wwwlogs/nginx_error.log ，错误类型为 crit ，也就是记录最少错误信息； 
+
+
+
+把项目放到线上注意事项：
+1.要把框架放上去
+2.需要把执行用户改为进程守护者(ps aux | grep nginx)
+3.注意修改项目配置文件里的数据库密码
+
+安装snv用yum安装yum -y install subversion
+rpm -qa subversion检查是否安装svn
+
+svn的shell脚本
+svn.sh里面内容是:svn checkout svn://123.196.116.66/ChengChengGroup/Src/ChChFoundCrm
+
+非常痛苦的bug调试解决方法
+环境搭建好，phpinfo可以访问，把项目放到线上首页访问没问题，但是二级目录访问有问题，报404错误：
+解决方案：
+http://my.oschina.net/caomenglong/blog/660529 博客
+1，修改PHP.INI 支持 PHPINOF
+
+PHP配置文件：/usr/local/php/etc/php.ini
+
+更改php.ini
+找到：cgi.fix_pathinfo=0
+更改为：cgi.fix_pathinfo=1
+2.修改nginx对应配置文件
+
+/usr/local/nginx/conf/vhost/你的域名配置文件
+去掉include pathinfo的#，在try_files前加#；
+#try_files $uri =404;
+fastcgi_pass  unix:/tmp/php-cgi.sock;
+fastcgi_index index.php;
+include fastcgi.conf;
+include pathinfo.conf;
